@@ -44,11 +44,18 @@ cleanup() {
 trap cleanup EXIT
 cleanup  # clear any leftovers from a previous run
 
-echo "==> building proposer + attester (release)"
 # Build as the invoking user if run under sudo, so artifacts stay user-owned.
-if [[ -n "${SUDO_USER:-}" ]]; then
-  sudo -u "${SUDO_USER}" cargo build --release --bins
+# Skip if the release binaries already exist - this also sidesteps the common
+# case where sudo's secure_path PATH omits a rustup-installed ~/.cargo/bin and
+# 'cargo' is reported not found.
+if [[ -x target/release/proposer && -x target/release/attester ]]; then
+  echo "==> using existing release binaries (skipping build)"
+elif [[ -n "${SUDO_USER:-}" ]]; then
+  echo "==> building proposer + attester (release, as ${SUDO_USER})"
+  USER_HOME="$(getent passwd "${SUDO_USER}" | cut -d: -f6)"
+  sudo -u "${SUDO_USER}" env "PATH=${USER_HOME}/.cargo/bin:${PATH}" cargo build --release --bins
 else
+  echo "==> building proposer + attester (release)"
   cargo build --release --bins
 fi
 
@@ -61,6 +68,18 @@ ip netns exec "${NS}" ip addr add "${NS_IP}/24" dev "${NS_IF}"
 ip link set "${HOST_IF}" up
 ip netns exec "${NS}" ip link set "${NS_IF}" up
 ip netns exec "${NS}" ip link set lo up
+
+# Pre-resolve ARP with static neighbor entries on both sides. Without this the
+# proposer's one-shot 256-datagram burst is fired before ARP resolves; Linux
+# only queues a couple of packets per UNRESOLVED neighbor and drops the rest, so
+# nearly the whole batch is lost at the neighbor layer (on top of netem, which
+# would also drop the ARP request itself). Static entries make the only loss the
+# netem loss we asked for.
+HOST_MAC="$(cat "/sys/class/net/${HOST_IF}/address")"
+NS_MAC="$(ip netns exec "${NS}" cat "/sys/class/net/${NS_IF}/address")"
+ip neigh replace "${NS_IP}" lladdr "${NS_MAC}" dev "${HOST_IF}" nud permanent
+ip netns exec "${NS}" ip neigh replace "${HOST_IP}" lladdr "${HOST_MAC}" dev "${NS_IF}" nud permanent
+
 # Drop a fraction of egress datagrams on the proposer -> attester direction.
 tc qdisc add dev "${HOST_IF}" root netem loss "${LOSS_PCT}%"
 

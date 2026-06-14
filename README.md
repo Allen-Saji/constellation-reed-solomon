@@ -106,10 +106,14 @@ sudo ./scripts/netem_sim.sh 70 16384    # 70% packet loss, 16 KB pslice
 ```
 
 Builds an isolated network namespace + veth pair (your real loopback is never
-touched), applies `tc netem loss 70%` on the link to the attester, fires all 256
-pshreds, and reconstructs from whatever survives. At 64-of-256 the pslice survives
-any loss that still delivers >= 64 pshreds (so ~75% loss is the theoretical edge;
-70% leaves comfortable margin). Requires root and `iproute2`.
+touched), seeds static ARP entries so the only loss is the netem loss you asked
+for, applies `tc netem loss 70%` on the link to the attester, fires all 256
+pshreds, and reconstructs from whatever survives. The pslice survives any loss
+that still delivers >= 64 of 256 pshreds, so ~75% loss is the theoretical edge.
+At the 70% default you expect ~77 survivors (mean), which clears the 64 floor but
+only by a slim, noisy margin - individual runs land in the high 60s and a run can
+dip near 64 (std ~7 shards). Drop to `50` for a robustly-passing showcase, or push
+to `80` to watch it fail past the edge. Requires root and `iproute2`.
 
 ### Benchmarks (extends PR #5695)
 
