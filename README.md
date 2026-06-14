@@ -8,6 +8,8 @@ An experiment: take the erasure coding Solana ships today, re-tune it to the siz
 a proposed multi-proposer consensus change would need, and measure whether it still
 fits the latency budget.
 
+![Constellation erasure coding: pslice to 256 pshreds and back](docs/architecture.png)
+
 ## The idea in one paragraph
 
 Constellation (Anza's Multiple Concurrent Proposers proposal) erasure-codes a
