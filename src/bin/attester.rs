@@ -11,7 +11,7 @@ use std::env;
 use std::net::UdpSocket;
 use std::time::{Duration, Instant};
 
-use adv_svm_erasure_lab::{demo_pslice, Attester, Pshred, GAMMA_P, N_PSHREDS};
+use constellation_reed_solomon::{demo_pslice, Attester, Pshred, GAMMA_P, N_PSHREDS};
 
 fn main() -> std::io::Result<()> {
     let bind = env::args().nth(1).unwrap_or_else(|| "10.55.0.2:9000".to_string());

@@ -1,7 +1,7 @@
 //! Tests for the from-scratch GF(2^8) + Reed-Solomon bonus module.
 
-use adv_svm_erasure_lab::internals::gf256;
-use adv_svm_erasure_lab::internals::rs::RsGf256;
+use constellation_reed_solomon::internals::gf256;
+use constellation_reed_solomon::internals::rs::RsGf256;
 
 #[test]
 fn gf_boundary_values() {

@@ -1,8 +1,8 @@
-//! Bonus: Reed-Solomon from scratch over GF(2^8).
+//! Reed-Solomon from scratch over GF(2^8).
 //!
-//! The graded challenge uses the `reed-solomon-erasure` crate. This module is
+//! The main crate builds on the `reed-solomon-erasure` crate. This module is
 //! **not** that - it reimplements what the crate's `galois_8` backend does
-//! internally, so you can see the machinery rather than treat it as a black box:
+//! internally, to show the machinery rather than treat it as a black box:
 //!
 //! * [`gf256`] - GF(2^8) field arithmetic (XOR add, log/exp-table multiply,
 //!   inverse), with the irreducible polynomial `0x11D` and primitive element

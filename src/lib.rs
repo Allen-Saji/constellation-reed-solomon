@@ -1,11 +1,9 @@
-//! # adv-svm-erasure-lab
+//! # Constellation erasure encoder
 //!
 //! A Constellation-parameterised Reed-Solomon erasure encoder, built on the same
 //! crate Agave uses (`reed-solomon-erasure`, `galois_8::ReedSolomon`), and
 //! re-parameterised from Agave's current Turbine FEC sizing to Solana
 //! Constellation's proposer/attester sizing.
-//!
-//! Turbin3 Advanced SVM cohort, Week 3 challenge.
 //!
 //! ## What this is
 //!

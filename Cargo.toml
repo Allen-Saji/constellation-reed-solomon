@@ -1,10 +1,10 @@
 [package]
-name = "adv-svm-erasure-lab"
+name = "constellation-reed-solomon"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "Constellation-parameterised Reed-Solomon erasure coding, built from scratch and validated against reed-solomon-novelpoly. Turbin3 Advanced SVM, Week 3."
-repository = "https://github.com/Allen-Saji/adv-svm-erasure-lab"
+description = "Constellation-parameterised Reed-Solomon erasure coding, built on the crate Agave uses and re-parameterised from Turbine's FEC sizing to Constellation's proposer/attester sizing."
+repository = "https://github.com/Allen-Saji/constellation-reed-solomon"
 readme = "README.md"
 keywords = ["reed-solomon", "erasure-coding", "solana", "constellation", "galois-field"]
 categories = ["algorithms", "encoding"]

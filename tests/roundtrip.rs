@@ -1,13 +1,12 @@
 //! Round-trip correctness tests.
 //!
-//! Per the challenge's tip: "running your encoder's output back through the
-//! decoder and verifying the original data is recovered is the only meaningful
-//! test of RS correctness." So every test here encodes a pslice, simulates
-//! attester loss by dropping pshreds, reconstructs, and asserts the original
-//! pslice comes back.
+//! Running the encoder's output back through the decoder and verifying the
+//! original data is recovered is the core test of RS correctness. So every test
+//! here encodes a pslice, simulates attester loss by dropping pshreds,
+//! reconstructs, and asserts the original pslice comes back.
 
-use adv_svm_erasure_lab::constellation::{DATA_SHARDS, EXPANSION};
-use adv_svm_erasure_lab::{Attester, Error, Proposer, Pshred, Pslice, GAMMA_P, N_PSHREDS};
+use constellation_reed_solomon::constellation::{DATA_SHARDS, EXPANSION};
+use constellation_reed_solomon::{Attester, Error, Proposer, Pshred, Pslice, GAMMA_P, N_PSHREDS};
 
 /// Deterministic pseudo-random bytes (xorshift) so tests need no rng dependency.
 fn pseudo_bytes(seed: u64, len: usize) -> Vec<u8> {

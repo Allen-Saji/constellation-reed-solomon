@@ -1,10 +1,12 @@
-# adv-svm-erasure-lab
+# Constellation erasure encoder
 
 A **Constellation-parameterised Reed-Solomon erasure encoder**, built on the same
 crate Agave uses and re-parameterised from Agave's current Turbine FEC sizing to
 Solana Constellation's proposer/attester sizing.
 
-Turbin3 Q2 2026 Advanced SVM cohort, Week 3 challenge.
+An experiment: take the erasure coding Solana ships today, re-tune it to the sizing
+a proposed multi-proposer consensus change would need, and measure whether it still
+fits the latency budget.
 
 ## The idea in one paragraph
 
@@ -17,9 +19,10 @@ reaching more than ~75% of attesters (you must suppress more than `256 - 64 = 19
 of 256), instead of silencing a handful of nodes. Erasure coding, not replication,
 is what makes inclusion censorship-resistant.
 
-## Grounded in Agave (the part the challenge asks you to read first)
+## Grounded in Agave
 
-Read `ledger/src/shredder.rs` and `ledger/src/shred.rs` in
+The starting point is Agave's shredder, `ledger/src/shredder.rs` and
+`ledger/src/shred.rs` in
 [anza-xyz/agave](https://github.com/anza-xyz/agave). Today Agave shreds at:
 
 ```rust
@@ -78,14 +81,14 @@ stays in GF(2^8), right at the edge.
 src/constellation.rs   Pslice/Pshred types, ReedSolomonCache, Proposer (encode), Attester (decode)
 src/bin/proposer.rs    sends 256 pshreds as UDP datagrams (for the netem demo)
 src/bin/attester.rs    receives survivors, reconstructs, verifies
-tests/roundtrip.rs     encode -> drop -> reconstruct -> assert equal (the only meaningful RS test)
+tests/roundtrip.rs     encode -> drop -> reconstruct -> assert equal (the core RS correctness test)
 benches/encode_decode.rs   Criterion bench extending Agave PR #5695's structure
 scripts/netem_sim.sh   tc netem attester-loss simulation in an isolated netns
 ```
 
 ## Run it
 
-### Round-trip correctness (the challenge's required test)
+### Round-trip correctness
 
 ```bash
 cargo test
@@ -145,7 +148,7 @@ Takeaways:
   rebuilding 64 data shards from 64 survivors, independent of how many parity
   shards were also lost.
 
-## Honesty / caveats
+## Scope and caveats
 
 * Benchmarks are single-machine, non-SIMD, short-sample - directional, not Anza
   production figures. Re-run with `simd-accel` and longer measurement for real
