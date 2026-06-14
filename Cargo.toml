@@ -1,0 +1,29 @@
+[package]
+name = "adv-svm-erasure-lab"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Constellation-parameterised Reed-Solomon erasure coding, built from scratch and validated against reed-solomon-novelpoly. Turbin3 Advanced SVM, Week 3."
+repository = "https://github.com/Allen-Saji/adv-svm-erasure-lab"
+readme = "README.md"
+keywords = ["reed-solomon", "erasure-coding", "solana", "constellation", "galois-field"]
+categories = ["algorithms", "encoding"]
+
+# Pinned to the exact crate+version Agave uses (see ledger/Cargo.toml in
+# anza-xyz/agave). galois_8 = GF(2^8); max total shards = 256, which is exactly
+# Constellation's Gamma_p. Agave additionally enables "simd-accel"; left off here
+# for portable builds (flip it on to match Agave's production path).
+[dependencies]
+reed-solomon-erasure = "6.0.0"
+
+[dev-dependencies]
+proptest = "1"
+criterion = "0.5"
+
+[[bench]]
+name = "encode_decode"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
