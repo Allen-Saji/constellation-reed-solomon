@@ -63,6 +63,10 @@ impl RsGf256 {
     pub fn encode(&self, shards: &mut [Vec<u8>]) {
         assert_eq!(shards.len(), self.total, "need exactly `total` shard slots");
         let len = shards[0].len();
+        debug_assert!(
+            shards[..self.data].iter().all(|s| s.len() == len),
+            "all data shards must have equal length"
+        );
         for r in self.data..self.total {
             let mut out = vec![0u8; len];
             for j in 0..self.data {
@@ -87,6 +91,10 @@ impl RsGf256 {
             return None;
         }
         let len = present[0].1.len();
+        debug_assert!(
+            present.iter().all(|(_, d)| d.len() == len),
+            "all surviving shards must have equal length"
+        );
 
         // Form the k x k matrix from the generator rows of any k present shards.
         let mut m = vec![vec![0u8; k]; k];
