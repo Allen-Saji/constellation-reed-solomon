@@ -146,3 +146,47 @@ fn expansion_is_4x() {
     assert_eq!(encoded_bytes, N_PSHREDS * shard_len);
     assert_eq!(encoded_bytes / (DATA_SHARDS * shard_len), EXPANSION);
 }
+
+/// Property-based round-trip. The assignment's tip says round-tripping is the
+/// only meaningful test of RS correctness, so this asserts it as a universally
+/// quantified property: for any pslice and any choice of exactly `gamma_p`
+/// surviving pshreds, the decoder returns the exact original bytes. This widens
+/// the deterministic tests above to randomised sizes and erasure patterns.
+mod property {
+    use super::*;
+    use proptest::prelude::*;
+    use std::sync::OnceLock;
+
+    // Build the (64, 192) encoder/decoder once and share it across all cases;
+    // their caches memoise the ReedSolomon matrix, so we pay for it once rather
+    // than rebuilding it per case.
+    fn proposer() -> &'static Proposer {
+        static P: OnceLock<Proposer> = OnceLock::new();
+        P.get_or_init(Proposer::new)
+    }
+    fn attester() -> &'static Attester {
+        static A: OnceLock<Attester> = OnceLock::new();
+        A.get_or_init(Attester::new)
+    }
+
+    proptest! {
+        // 64 cases keeps this snappy; size is bounded since the property under
+        // test is the erasure pattern, not large payloads (the deterministic
+        // tests above already cover sizes up to 200 KB).
+        #![proptest_config(ProptestConfig::with_cases(64))]
+        #[test]
+        fn roundtrip_any_pslice_any_64_survivors(
+            data in proptest::collection::vec(any::<u8>(), 0..=8_192),
+            survivors in proptest::sample::subsequence(
+                (0..N_PSHREDS).collect::<Vec<usize>>(),
+                GAMMA_P,
+            ),
+        ) {
+            let pslice = Pslice::new(data);
+            let pshreds = proposer().shred(&pslice).unwrap();
+            let kept: Vec<Pshred> = survivors.iter().map(|&i| pshreds[i].clone()).collect();
+            let recovered = attester().reconstruct(&kept).unwrap();
+            prop_assert_eq!(recovered, pslice);
+        }
+    }
+}
